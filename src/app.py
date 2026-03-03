@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
 
 # In-memory activity database
 activities = {
-    , "Soccer Team": {
+    "Soccer Team": {
         "description": "Team practices and inter-school soccer matches",
         "schedule": "Mondays and Wednesdays, 4:00 PM - 5:30 PM",
         "max_participants": 22,
@@ -56,7 +56,7 @@ activities = {
         "schedule": "Thursdays, 3:30 PM - 5:00 PM",
         "max_participants": 15,
         "participants": ["harper@mergington.edu", "evelyn@mergington.edu"]
-    }
+    },
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
@@ -106,3 +106,18 @@ def signup_for_activity(activity_name: str, email: str):
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+@app.delete("/activities/{activity_name}/participants")
+def unregister_from_activity(activity_name: str, email: str):
+    """Remove a student from an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    activity = activities[activity_name]
+
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=404, detail="Student not registered for this activity")
+
+    activity["participants"].remove(email)
+    return {"message": f"Removed {email} from {activity_name}"}
